@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Primary Meta Tags -->
+  <meta name="title" content="Radar-DOT: Image Frame Dynamic Object Segmentation and Ego Motion Estimation using Radar Image Fusion">
+  <meta name="description" content="Radar-DOT uses radar Doppler measurements to jointly estimate ego velocity and segment dynamic objects in RGB images through rigid-flow and depth consistency.">
+  <meta name="keywords" content="radar, doppler, ego-motion estimation, dynamic object segmentation, radar-camera fusion, optical flow, nuScenes, autonomous driving">
+  <meta name="author" content="Astik Srivastava, Suhani Grover, Avinash Sharma, K. Madhava Krishna">
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="English">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="International Institute of Information Technology, Hyderabad">
+  <meta property="og:title" content="Radar-DOT: Image Frame Dynamic Object Segmentation and Ego Motion Estimation using Radar Image Fusion">
+  <meta property="og:description" content="Radar-DOT uses radar Doppler measurements to jointly estimate ego velocity and segment dynamic objects in RGB images.">
+  <meta property="og:url" content="https://astik-2002.github.io/Radar-MOS/">
+  <meta property="og:image" content="https://astik-2002.github.io/Radar-MOS/static/images/segmentation_mask.jpg">
+  <meta property="og:image:alt" content="Radar-DOT dynamic object segmentation example">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Radar-DOT: Image Frame Dynamic Object Segmentation and Ego Motion Estimation using Radar Image Fusion">
+  <meta name="twitter:description" content="Radar-DOT uses radar Doppler measurements to jointly estimate ego velocity and segment dynamic objects in RGB images.">
+  <meta name="twitter:image" content="https://astik-2002.github.io/Radar-MOS/static/images/segmentation_mask.jpg">
+
+  <!-- Academic/Research Specific -->
+  <meta name="citation_title" content="Image Frame Dynamic Object Segmentation and Ego Motion Estimation using Radar Image Fusion">
+  <meta name="citation_author" content="Srivastava, Astik">
+  <meta name="citation_author" content="Grover, Suhani">
+  <meta name="citation_author" content="Sharma, Avinash">
+  <meta name="citation_author" content="Krishna, K. Madhava">
+  <meta name="citation_publication_date" content="2026">
+  <meta name="citation_arxiv_id" content="2609.22857">
+  <meta name="citation_pdf_url" content="https://arxiv.org/pdf/2609.22857">
+
+  <meta name="theme-color" content="#2563eb">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://ajax.googleapis.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+  <title>Radar-DOT: Image Frame Dynamic Object Segmentation and Ego Motion Estimation using Radar Image Fusion</title>
+
+  <!-- Critical CSS -->
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+
+  <!-- Non-critical CSS -->
+  <link rel="preload" href="static/css/bulma-carousel.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="static/css/bulma-slider.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="static/css/fontawesome.all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="static/css/bulma-carousel.min.css">
+    <link rel="stylesheet" href="static/css/bulma-slider.min.css">
+    <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  </noscript>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Page-specific styles -->
+  <style>
+    .figure-caption {
+      font-size: 0.95rem;
+      color: #4a4a4a;
+      margin-top: 0.75rem;
+    }
+    .results-table {
+      margin: 0 auto;
+      font-size: 0.95rem;
+    }
+    .results-table th,
+    .results-table td {
+      text-align: center !important;
+    }
+    .results-table td:first-child,
+    .results-table th:first-child {
+      text-align: left !important;
+    }
+    .results-table tr.is-good td {
+      background-color: #ecfdf5;
+    }
+    .results-table tr.is-poor td {
+      background-color: #fef2f2;
+    }
+    .results-table tfoot td {
+      font-weight: 700;
+      border-top: 2px solid #363636;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    .metric-tiles {
+      margin-bottom: 1.5rem;
+    }
+    .metric-tile {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 1rem 0.5rem;
+      background: #fff;
+    }
+    .metric-tile .metric-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1f2937;
+      line-height: 1.2;
+    }
+    .metric-tile .metric-label {
+      font-size: 0.85rem;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .results-carousel .item .scene-label {
+      font-size: 1rem;
+      text-align: center;
+      font-weight: 600;
+      margin-top: 0.6rem;
+      color: #363636;
+    }
+    .results-carousel .item .scene-label span {
+      font-weight: 400;
+      color: #6b7280;
+    }
+    .section-intro {
+      max-width: 820px;
+      margin: 0 auto 1.25rem auto;
+      text-align: center;
+      color: #4a4a4a;
+    }
+    .equation {
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+  </style>
+
+  <!-- MathJax for equations -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+  <script defer src="static/js/bulma-carousel.min.js"></script>
+  <script defer src="static/js/bulma-slider.min.js"></script>
+  <script defer src="static/js/index.js"></script>
+</head>
+<body>
+
+  <!-- Scroll to Top Button -->
+  <button class="scroll-to-top" onclick="scrollToTop()" title="Scroll to top" aria-label="Scroll to top">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <main id="main-content">
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">Radar-DOT: Image Frame Dynamic Object Segmentation and Ego Motion Estimation using Radar Image Fusion</h1>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="https://github.com/Astik-2002" target="_blank">Astik Srivastava</a><sup>1</sup>,
+              </span>
+              <span class="author-block">
+                <a href="https://scholar.google.com/citations?hl=en&amp;user=gh98x-oAAAAJ" target="_blank">Suhani Grover</a><sup>1</sup>,
+              </span>
+              <span class="author-block">
+                <a href="https://scholar.google.com/citations?hl=en&amp;user=4ladtC0AAAAJ" target="_blank">Avinash Sharma</a><sup>2</sup>,
+              </span>
+              <span class="author-block">
+                <a href="https://scholar.google.com/citations?hl=en&amp;user=QDuPGHwAAAAJ" target="_blank">K. Madhava Krishna</a><sup>1</sup>
+              </span>
+            </div>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><sup>1</sup>International Institute of Information Technology, Hyderabad</span>
+              <span class="author-block"><sup>2</sup>Indian Institute of Technology, Bombay</span>
+            </div>
+            <br>
+            <div class="publication-links has-text-centered">
+              <a href="https://arxiv.org/abs/2609.22857" target="_blank" class="button is-normal is-rounded is-dark">
+                <span class="icon"><i class="ai ai-arxiv"></i></span>
+                <span>arXiv</span>
+              </a>
+              <a href="static/pdfs/Radar-DOT.pdf" target="_blank" class="button is-normal is-rounded is-dark">
+                <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                <span>Paper</span>
+              </a>
+              <a href="https://github.com/Astik-2002/Radar-MOS" target="_blank" class="button is-normal is-rounded is-dark">
+                <span class="icon"><i class="fab fa-github"></i></span>
+                <span>Code</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Teaser -->
+  <section class="hero teaser">
+    <div class="container is-max-desktop">
+      <div class="hero-body">
+        <video poster="" id="teaser" autoplay controls muted loop playsinline height="100%" preload="metadata">
+          <source src="static/videos/good_scene-0061.mp4" type="video/mp4">
+        </video>
+        <h2 class="subtitle has-text-centered">
+          Radar-DOT segments independently moving objects in the camera image using only geometry: radar Doppler
+          gives the ego velocity, and pixels whose optical flow and depth disagree with the rigid scene motion are flagged as dynamic.
+        </h2>
+      </div>
+    </div>
+  </section>
+  <!-- End teaser -->
+
+  <!-- Paper abstract -->
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              Dynamic object segmentation and ego-motion estimation are closely coupled problems in autonomous driving, as
+              accurate ego-motion estimation typically requires static scene observations, while identifying static
+              observations requires knowledge of the ego motion. We present Radar-DOT, a radar&ndash;RGB framework that
+              exploits radar Doppler measurements to address this coupling. Radar returns are first used to estimate ego
+              velocity through a linear Doppler constraint, with residual-based static/dynamic segmentation and robust
+              estimation used to reduce the influence of moving objects. The estimated motion is then combined with metric
+              depth and dense optical flow to identify image regions whose observed motion is inconsistent with the rigid
+              scene motion. Experiments on 10 nuScenes scenes (part of nuscenes-mini) demonstrate that the resulting
+              geometric pipeline achieves 20.24% dynamic IoU and 33.67% F1-score over 394 frame pairs, while radar-based
+              static-point filtering improves ego-velocity estimation compared with using all radar returns. These results
+              demonstrate the potential of radar as a modality for jointly improving ego-motion estimation and dynamic
+              object segmentation.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End paper abstract -->
+
+  <!-- Contributions -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 has-text-centered">Contributions</h2>
+          <div class="content has-text-justified">
+            <ul>
+              <li>We estimate <b>ego velocity from radar Doppler measurements</b> while explicitly separating static and dynamic radar returns.</li>
+              <li>We use the radar-derived ego velocity to <b>predict rigid background flow</b> and combine flow and depth consistency to identify independently moving image regions.</li>
+              <li>We evaluate the complete <b>closed-loop pipeline on ten nuScenes scenes</b> using nuInsSeg-based dynamic-object masks, and analyze the contributions of radar ego-motion and the flow/depth consistency formulation.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End contributions -->
+
+  <!-- Methodology -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 has-text-centered">Methodology</h2>
+          <div class="content has-text-justified">
+
+            <h3 class="title is-5">Radar Odometry from Doppler</h3>
+            <p>
+              Each radar return provides a range $r_i$, an azimuth $\theta_i$ and a line-of-sight Doppler velocity $d_i$.
+              Under a static-world assumption, every return must satisfy a linear constraint on the ego velocity
+              $\mathbf{v}_{ego} = [v_x \; v_y]^\top$ through its unit bearing $\mathbf{u}_i = [\cos\theta_i \; \sin\theta_i]$:
+            </p>
+            <div class="equation">
+              $$\mathbf{u}_i^\top \mathbf{v}_{ego} = -d_i, \qquad i = 1, \dots, N.$$
+            </div>
+            <p>
+              Stacking all returns gives an overdetermined system that is solved by least squares. The estimated velocity is
+              rotated into the world frame and integrated over time to reconstruct the trajectory.
+            </p>
+
+            <h3 class="title is-5">Static / Dynamic Radar Segmentation</h3>
+            <p>
+              Returns from moving objects violate the static-world constraint. Given an initial estimate
+              $\hat{\mathbf{v}}_{ego}$, the Doppler residual of each return is
+            </p>
+            <div class="equation">
+              $$e_i = \left| d_i + \mathbf{u}_i^\top \hat{\mathbf{v}}_{ego} \right|,$$
+            </div>
+            <p>
+              and returns with $e_i \geq \tau$ are marked dynamic. The ego velocity is then re-estimated using only the
+              static set $\mathcal{S}$, optionally inside a RANSAC loop to make the initial estimate robust to moving objects
+              and other outliers:
+            </p>
+            <div class="equation">
+              $$\hat{\mathbf{v}}^{static}_{ego} = \arg\min_{\mathbf{v}} \sum_{i \in \mathcal{S}} \left( \mathbf{u}_i^\top \mathbf{v} + d_i \right)^2.$$
+            </div>
+
+            <h3 class="title is-5">Rigid-Flow and Depth Consistency</h3>
+            <p>
+              For two consecutive frames, metric depth maps $D_{t-1}, D_t$ are estimated from RGB and radar with
+              JustDepth. The radar ego velocity gives the camera
+              translation $\mathbf{t}_{t-1\to t} = \mathbf{v}_{ego,t-1}\Delta t$ (rotation comes from ground-truth heading).
+              Each pixel is back-projected with its depth, moved rigidly, and re-projected to obtain the
+              <b>expected flow</b> $\mathbf{f}_{est}$ of a static scene. This is compared against the <b>observed flow</b>
+              $\mathbf{f}_{obs}$ from a pretrained optical-flow network, and, since flow alone is ambiguous for objects moving
+              along the viewing direction, against the depth observed at the projected location:
+            </p>
+            <div class="equation">
+              $$e_{flow} = \left\| \mathbf{f}_{obs} - \mathbf{f}_{est} \right\|_2, \qquad e_{depth} = \left| D_t(u', v') - Z_{est} \right|.$$
+            </div>
+            <p>
+              The residuals are combined into a normalized dynamic score whose tolerances grow with range and near the
+              focus of expansion, where flow is least reliable:
+            </p>
+            <div class="equation">
+              $$S(u,v) = \frac{e_{flow}(u,v)}{\sigma_{flow}(u,v)} + \lambda \frac{e_{depth}(u,v)}{\sigma_{depth}(u,v)}.$$
+            </div>
+            <p>
+              A per-frame robust threshold $\tau = \mathrm{median}(S) + k\,\mathrm{MAD}(S)$ produces the dynamic mask.
+              Occluded and out-of-bounds pixels are excluded, and morphological opening and closing clean up the result.
+              No component of this pipeline is trained for segmentation.
+            </p>
+
+            <div class="has-text-centered">
+              <img src="static/images/pipeline_panels.jpg" alt="Intermediate outputs of the Radar-DOT pipeline" style="max-width: 100%;">
+              <p class="figure-caption">
+                Pipeline outputs. Top row: RGB image, flow residual $\mathbf{f}_{obs} - \mathbf{f}_{est}$, expected rigid flow
+                $\mathbf{f}_{est}$. Bottom row: metric depth $D_{t-1}$, segmented radar point cloud (red = dynamic),
+                observed optical flow $\mathbf{f}_{obs}$.
+              </p>
+            </div>
+            <br>
+            <div class="has-text-centered">
+              <img src="static/images/segmentation_mask.jpg" alt="Final dynamic object segmentation mask" style="max-width: 80%;">
+              <p class="figure-caption">Final dynamic segmentation mask overlaid on the image.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End methodology -->
+
+  <!-- Quantitative results -->
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 has-text-centered">Results</h2>
+
+          <h3 class="title is-5">Dynamic Segmentation on nuScenes</h3>
+          <div class="content has-text-justified">
+            <p>
+              We evaluate on 10 nuScenes scenes (394 consecutive frame pairs) against image-space dynamic masks built from
+              nuInsSeg instances carrying the nuScenes
+              <i>moving</i> attribute. Metrics are pixel-level and aggregated over all frames.
+            </p>
+          </div>
+
+          <div class="columns is-mobile is-multiline has-text-centered metric-tiles">
+            <div class="column is-half-mobile is-one-quarter-tablet">
+              <div class="metric-tile"><div class="metric-value">20.24%</div><div class="metric-label">Dynamic IoU</div></div>
+            </div>
+            <div class="column is-half-mobile is-one-quarter-tablet">
+              <div class="metric-tile"><div class="metric-value">33.67%</div><div class="metric-label">F1-score</div></div>
+            </div>
+            <div class="column is-half-mobile is-one-quarter-tablet">
+              <div class="metric-tile"><div class="metric-value">31.24%</div><div class="metric-label">Precision</div></div>
+            </div>
+            <div class="column is-half-mobile is-one-quarter-tablet">
+              <div class="metric-tile"><div class="metric-value">36.51%</div><div class="metric-label">Recall</div></div>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="table is-hoverable is-narrow results-table">
+              <thead>
+                <tr><th>Scene</th><th>Frames</th><th>IoU</th><th>Precision</th><th>Recall</th><th>F1</th></tr>
+              </thead>
+              <tbody>
+                <tr class="is-good"><td>scene-0061</td><td>38</td><td>0.3602</td><td>0.5177</td><td>0.5420</td><td>0.5296</td></tr>
+                <tr><td>scene-0103</td><td>39</td><td>0.1859</td><td>0.2538</td><td>0.4097</td><td>0.3135</td></tr>
+                <tr class="is-good"><td>scene-0553</td><td>40</td><td>0.2660</td><td>0.4355</td><td>0.4059</td><td>0.4202</td></tr>
+                <tr><td>scene-0655</td><td>40</td><td>0.0201</td><td>0.0220</td><td>0.1872</td><td>0.0394</td></tr>
+                <tr class="is-good"><td>scene-0757</td><td>40</td><td>0.3528</td><td>0.5243</td><td>0.5190</td><td>0.5216</td></tr>
+                <tr><td>scene-0796</td><td>39</td><td>0.1299</td><td>0.1720</td><td>0.3464</td><td>0.2299</td></tr>
+                <tr><td>scene-0916</td><td>40</td><td>0.0177</td><td>0.0186</td><td>0.2637</td><td>0.0348</td></tr>
+                <tr class="is-poor"><td>scene-1077</td><td>40</td><td>0.0165</td><td>0.1352</td><td>0.0184</td><td>0.0324</td></tr>
+                <tr class="is-poor"><td>scene-1094</td><td>39</td><td>0.2453</td><td>0.5561</td><td>0.3050</td><td>0.3939</td></tr>
+                <tr class="is-poor"><td>scene-1100</td><td>39</td><td>0.0829</td><td>0.2188</td><td>0.1177</td><td>0.1530</td></tr>
+              </tbody>
+              <tfoot>
+                <tr><td>Overall</td><td>394</td><td>0.2024</td><td>0.3124</td><td>0.3651</td><td>0.3367</td></tr>
+              </tfoot>
+            </table>
+          </div>
+          <p class="figure-caption has-text-centered">
+            Per-scene performance of the radar-geometric dynamic segmentation baseline.
+            Highlighted rows are shown in the qualitative videos below (<span style="color:#059669;">green</span>: good cases,
+            <span style="color:#dc2626;">red</span>: failure cases).
+          </p>
+          <br>
+
+          <h3 class="title is-5">Radar Ego-Velocity Estimation</h3>
+          <div class="content has-text-justified">
+            <p>
+              Segmenting the radar point cloud into static and dynamic returns before solving for ego velocity lowers the
+              ego-velocity estimation accuracy compared with using the entire point cloud.
+            </p>
+          </div>
+          <div class="has-text-centered">
+            <img src="static/images/speed_mae.png" alt="Per-scene speed MAE for four ego-velocity estimators" style="max-width: 75%;">
+            <p class="figure-caption">
+              Per-scene speed MAE. <b>A1</b>/<b>B1</b>: least squares on segmented static points / all points.
+              <b>A2</b>/<b>B2</b>: least squares + RANSAC on segmented static points / all points.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End quantitative results -->
+
+  <!-- Qualitative results: good -->
+  <section class="hero is-small">
+    <div class="hero-body">
+      <div class="container">
+        <h2 class="title is-3">Qualitative Results</h2>
+        <p class="section-intro">
+          Scenes where rigid-flow inconsistency cleanly isolates the moving vehicles and pedestrians.
+        </p>
+        <div id="results-carousel-good" class="carousel results-carousel">
+          <div class="item">
+            <video poster="" controls muted loop playsinline height="100%" preload="metadata">
+              <source src="static/videos/good_scene-0061.mp4" type="video/mp4">
+            </video>
+            <p class="scene-label">scene-0061 <span>&middot; IoU 36.0% &middot; F1 53.0%</span></p>
+          </div>
+          <div class="item">
+            <video poster="" controls muted loop playsinline height="100%" preload="metadata">
+              <source src="static/videos/good_scene-0757.mp4" type="video/mp4">
+            </video>
+            <p class="scene-label">scene-0757 <span>&middot; IoU 35.3% &middot; F1 52.2%</span></p>
+          </div>
+          <div class="item">
+            <video poster="" controls muted loop playsinline height="100%" preload="metadata">
+              <source src="static/videos/good_scene-0553.mp4" type="video/mp4">
+            </video>
+            <p class="scene-label">scene-0553 <span>&middot; IoU 26.6% &middot; F1 42.0%</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End qualitative results: good -->
+
+  <!-- Qualitative results: failure cases -->
+  <section class="hero is-small is-light">
+    <div class="hero-body">
+      <div class="container">
+        <h2 class="title is-3">Failure Cases</h2>
+        <p class="section-intro">
+          Performance varies with scene characteristics: the amount and distribution of dynamic content, radar coverage,
+          depth quality, and the accuracy of the estimated ego motion. These scenes show where the purely geometric
+          formulation struggles.
+        </p>
+        <div id="results-carousel-poor" class="carousel results-carousel">
+          <div class="item">
+            <video poster="" controls muted loop playsinline height="100%" preload="metadata">
+              <source src="static/videos/poor_scene-1077.mp4" type="video/mp4">
+            </video>
+            <p class="scene-label">scene-1077 <span>&middot; IoU 1.7% &middot; F1 3.2%</span></p>
+          </div>
+          <div class="item">
+            <video poster="" controls muted loop playsinline height="100%" preload="metadata">
+              <source src="static/videos/poor_scene-1100.mp4" type="video/mp4">
+            </video>
+            <p class="scene-label">scene-1100 <span>&middot; IoU 8.3% &middot; F1 15.3%</span></p>
+          </div>
+          <div class="item">
+            <video poster="" controls muted loop playsinline height="100%" preload="metadata">
+              <source src="static/videos/poor_scene-1094.mp4" type="video/mp4">
+            </video>
+            <p class="scene-label">scene-1094 <span>&middot; IoU 24.5% &middot; F1 39.4%</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- End qualitative results: failure cases -->
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content">
+            <p>
+              This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a> which was adopted from the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
+              You are free to borrow the source code of this website, we just ask that you link back to this page in the footer. <br> This website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative
+              Commons Attribution-ShareAlike 4.0 International License</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
